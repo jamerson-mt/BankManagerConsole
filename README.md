@@ -41,30 +41,19 @@ A proposta da **JJ Banking API** é eliminar a necessidade de mocks estáticos e
 
 ---
 
-## 🛠️ Stack Tecnológica
-
-* **Runtime:** .NET 10 (ASP.NET Core)
-* **Linguagem:** C# 14
-* **Database:** PostgreSQL 17+
-* **ORM:** Entity Framework Core 10
-* **Container:** Docker & Docker Compose
-* **Documentação:** Swagger (OpenAPI 3.1)
-
----
-
 ## 🏗️ Arquitetura (Clean Architecture)
 
-O projeto é dividido em camadas para garantir manutenibilidade e testabilidade:
+O projeto segue os princípios da **Clean Architecture**, garantindo que a lógica de negócio seja independente de frameworks externos:
 
-* **`JJBanking.Domain`**: Entidades, interfaces e lógica de negócio pura.
-* **`JJBanking.Infra`**: Implementação de repositórios, contexto do PostgreSQL e Migrations.
-* **`JJBanking.API`**: Gerenciamento de rotas, DTOs e Injeção de Dependência.
+* **`JJBanking.Domain`**: O coração do projeto. Contém as Entidades (como `Account`) e as Regras de Negócio.
+* **`JJBanking.Infra`**: A camada de persistência. Gerencia o Contexto do Entity Framework e as Migrations para o PostgreSQL.
+* **`JJBanking.API`**: A porta de entrada. Gerencia os Controllers, DTOs e a documentação via Swagger.
 
 ---
 
 ## 🚀 Setup Instantâneo com Docker
 
-Esqueça configurações manuais. Com o Docker, você sobe toda a stack **JJ Banking** com apenas um comando:
+Esqueça configurações manuais de banco de dados. Com o Docker, você sobe toda a stack com apenas um comando:
 
 1. **Clone o repositório:**
    ```bash
