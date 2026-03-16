@@ -68,5 +68,5 @@ Esqueça configurações manuais. Com o Docker, você sobe toda a stack **JJ Ban
 
 1. **Clone o repositório:**
    ```bash
-   git clone [https://github.com/seu-usuario/jj-banking-api.git](https://github.com/seu-usuario/jj-banking-api.git)
+   git clone [https://github.com/jamerson-mt/jj-banking-api.git](https://github.com/jamerson-mt/jj-banking-api.git)
    cd jj-banking-api
