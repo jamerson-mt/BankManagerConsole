@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/JJBanking.API/JJBanking.API.csproj" />
+    <Project Path="src/JJBanking.Domain/JJBanking.Domain.csproj" />
+    <Project Path="src/JJBanking.Infra/JJBanking.Infra.csproj" />
+  </Folder>
+</Solution>
