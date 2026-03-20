@@ -24,7 +24,7 @@ public class AccountsControllerTests : IClassFixture<WebApplicationFactory<Progr
         var request = new
         {
             Owner = "Jamerson Teste",
-            Cpf = "99988877763",
+            Cpf = "99988877763", // O CPF DEVE SER UNICO PARA CADA TESTE, POIS A API NAO PERMITE DUPLICADOS
             InitialDeposit = 100.00m,
         };
 
