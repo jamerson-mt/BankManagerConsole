@@ -70,17 +70,17 @@ public class TransactionControllerTests : IClassFixture<WebApplicationFactory<Pr
 
         var accountResponse = await httpResponse.Content.ReadFromJsonAsync<AccountResponse>(); // Lê a resposta para obter o ID da conta criada
 
-        var withdrawRequest = new WithdrawRequest(
+        var withdrawRequest = new TransationWithdrawRequest(
             accountResponse!.Id, // Usa o ID da conta criada para o saque. o "!" é para informar que o accountResponse não será nulo, já que a conta foi criada com sucesso
             30.00m,
             "Saque de teste"
         );
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/transaction/withdraw", withdrawRequest);
+        var response = await _client.PostAsJsonAsync("/api/transaction/withdraw", withdrawRequest); // Envia a requisição de saque para o endpoint de saque da TransactionController
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        response.StatusCode.Should().Be(HttpStatusCode.OK); // Verifica se a resposta do saque foi OK (200)
 
         var content = await response.Content.ReadFromJsonAsync<TransactionResponse>(); // Lê a resposta do saque para verificar se os dados estão corretos
 

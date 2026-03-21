@@ -56,7 +56,15 @@ public class TransactionController : ControllerBase
                 request.Description
             );
 
-            return Ok(transaction);
+            var response = new TransactionResponse(
+                transaction.Id,
+                transaction.Amount,
+                transaction.Type.ToString(),
+                transaction.Description,
+                transaction.CreatedAt
+            );
+
+            return Ok(response);
         }
         catch (Exception ex)
         {
