@@ -27,4 +27,47 @@ public class TransactionTests
         transaction.Id.Should().NotBeEmpty(); // Garante que o GUID foi gerado
         transaction.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1)); // Verifica se a data de criação é recente
     }
+
+    // TESTE PARA VER SE O CONSTRUTOR DA TRANSAÇÃO LIDA COM VALORES NEGATIVOS
+    [Theory]
+    [InlineData(-50.00, TransactionType.Credit)] // Testa um valor negativo para depósito
+    [InlineData(-100.00, TransactionType.Debit)] // Testa um valor negativo para saque
+    public void Constructor_WhenAmountIsNegative_ShouldThrowException(
+        decimal amount,
+        TransactionType type
+    )
+    {
+        // Arrange
+        var accountId = Guid.NewGuid();
+        var description = "Teste de valor negativo";
+
+        // Act
+        Action act = () => new Transaction(accountId, amount, type, description);
+
+        // Assert
+        act.Should()
+            .Throw<ArgumentException>() // Espera que uma ArgumentException seja lançada
+            .WithMessage("O valor da transação não pode ser negativo. (Parameter 'amount')");
+    }
+
+    // TESTE PARA VER SE O CONSTRUTOR DA TRANSAÇÃO LIDA COM DESCRIÇÕES MUITO LONGAS
+    [Fact]
+    public void Constructor_WhenDescriptionIsTooLong_ShouldThrowException()
+    {
+        // Arrange
+        var accountId = Guid.NewGuid();
+        var amount = 100.00m;
+        var type = TransactionType.Credit;
+        var description = new string('A', 256); // Cria uma descrição com 256 caracteres
+
+        // Act
+        Action act = () => new Transaction(accountId, amount, type, description);
+
+        // Assert
+        act.Should()
+            .Throw<ArgumentException>() // Espera que uma ArgumentException seja lançada
+            .WithMessage(
+                "A descrição da transação não pode exceder 255 caracteres. (Parameter 'description')"
+            );
+    }
 }

@@ -39,7 +39,7 @@ public class AccountsController : ControllerBase
         _context.Accounts.Add(account);
         await _context.SaveChangesAsync();
 
-        var response = new AccountResponse(account.Id, account.Owner, account.Balance);
+        var response = new AccountResponse(account.Id, account.Owner,account.Cpf, account.Balance);
 
         return Ok(response);
     }
@@ -54,7 +54,7 @@ public class AccountsController : ControllerBase
         if (account == null)
             return NotFound("Conta não encontrada.");
 
-        var response = new AccountResponse(account.Id, account.Owner, account.Balance);
+        var response = new AccountResponse(account.Id, account.Owner, account.Cpf, account.Balance);
 
         return Ok(response);
     }

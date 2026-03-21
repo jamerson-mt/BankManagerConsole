@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
+using JJBanking.API.DTOs;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
 
@@ -42,6 +43,3 @@ public class AccountsControllerTests : IClassFixture<WebApplicationFactory<Progr
         content.Owner.Should().Be(request.Owner);
     }
 }
-
-// Coloque isso no final do arquivo, fora da classe AccountTests
-public record AccountResponse(Guid Id, string Owner, string Cpf, decimal Balance); // 
