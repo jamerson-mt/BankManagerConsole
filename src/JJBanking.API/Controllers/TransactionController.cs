@@ -82,4 +82,3 @@ public class TransactionController : ControllerBase
 }
 
 // DTO (Data Transfer Object) - Apenas para receber os dados do JSON
-public record DepositRequest(Guid AccountId, decimal Amount, string Description);
