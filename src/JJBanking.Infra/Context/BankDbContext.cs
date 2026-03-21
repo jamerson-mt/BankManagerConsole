@@ -8,7 +8,8 @@ public class BankDbContext : DbContext
     public BankDbContext(DbContextOptions<BankDbContext> options)
         : base(options) { }
 
-    public DbSet<Account> Accounts => Set<Account>();
+    public DbSet<Account> Accounts => Set<Account>(); // Propriedade para acessar a tabela de contas
+    public DbSet<Transaction> Transactions => Set<Transaction>(); // Propriedade para acessar a tabela de transações
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
