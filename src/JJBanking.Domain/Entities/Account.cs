@@ -25,7 +25,6 @@ public class Account
     [Required]
     public DateTime CreatedAt { get; private set; } = DateTime.UtcNow; // Data de criação da conta
 
-   
     public ICollection<Transaction> Transactions { get; private set; } = new List<Transaction>();
 
     // Construtor necessário para o Entity Framework

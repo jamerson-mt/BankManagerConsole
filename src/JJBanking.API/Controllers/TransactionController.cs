@@ -10,11 +10,12 @@ public class TransactionController : ControllerBase
 {
     private readonly IAccountService _accountService;
 
-    public TransactionController(IAccountService accountService)
+    public TransactionController(IAccountService accountService) //
     {
         _accountService = accountService;
     }
 
+    // REALIZA UMA TRANSAÇÃO DE DEPÓSITO
     [HttpPost("deposit")]
     public async Task<IActionResult> Deposit([FromBody] DepositRequest request)
     {
@@ -22,7 +23,7 @@ public class TransactionController : ControllerBase
         {
             // Chamamos o serviço e damos um "await" na promessa (Task)
             var transaction = await _accountService.DepositAsync(
-                request.AccountId,
+                request.AccountId, // O ID da conta para onde o dinheiro vai
                 request.Amount,
                 request.Description
             );
@@ -43,6 +44,7 @@ public class TransactionController : ControllerBase
         }
     }
 
+    // REALIZA UMA TRANSAÇÃO DE SAQUE
     [HttpPost("withdraw")]
     public async Task<IActionResult> Withdraw([FromBody] DepositRequest request)
     {
@@ -62,7 +64,7 @@ public class TransactionController : ControllerBase
         }
     }
 
-    // --- A MESMA LÓGICA PARA O WITHDRAW ---
+    // OBTÉM O EXTRATO DE TRANSAÇÕES DE UMA CONTA
     [HttpGet("statement/{accountId}")]
     public async Task<IActionResult> GetStatement(Guid accountId)
     {

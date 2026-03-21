@@ -1,3 +1,4 @@
+using JJBanking.API.DTOs;
 using JJBanking.Domain.Entities;
 using JJBanking.Infra.Context;
 using Microsoft.AspNetCore.Mvc;
@@ -19,7 +20,7 @@ public class AccountsController : ControllerBase
     // 🚀 POST: api/accounts
     // CRIA UMA NOVA CONTA
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateAccountRequest request)
+    public async Task<IActionResult> Create([FromBody] CreatedAccountResponse request)
     {
         // Validação básica
         if (request.InitialDeposit < 0)
@@ -38,7 +39,9 @@ public class AccountsController : ControllerBase
         _context.Accounts.Add(account);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetById), new { id = account.Id }, account);
+        var response = new AccountResponse(account.Id, account.Owner, account.Balance);
+
+        return Ok(response);
     }
 
     // 🆔 GET: api/accounts/{id}
@@ -56,4 +59,3 @@ public class AccountsController : ControllerBase
 }
 
 // DTO (Data Transfer Object) para não expor a entidade pura no request
-public record CreateAccountRequest(string Owner, string Cpf, decimal InitialDeposit);
