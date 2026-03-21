@@ -56,17 +56,26 @@ Para garantir a confiabilidade bancária, o projeto conta com:
 * **FluentAssertions:** Escrita de testes semânticos e de fácil manutenção.
 
 ---
-
 ## 🛠️ Guia de Endpoints (v1)
 
-### 👤 Contas (`/api/accounts`)
-* `POST /` - Criação de conta com depósito inicial obrigatório.
-* `GET /{id}` - Consulta de dados da conta e saldo em tempo real.
+A API utiliza **Swagger/OpenAPI** para documentação. Ao rodar o projeto, acesse `/swagger` para testar os endpoints interativamente.
 
-### 💸 Transações (`/api/transaction`)
-* `POST /deposit` - Realiza um aporte financeiro em uma conta.
-* `POST /withdraw` - Realiza um saque (valida saldo insuficiente e valores positivos).
-* `GET /statement/{accountId}` - Retorna o histórico completo de transações da conta.
+### 👤 Gerenciamento de Contas (`/api/accounts`)
+
+| Método | Endpoint | Descrição |
+| :--- | :--- | :--- |
+| `POST` | `/api/accounts` | Cria uma nova conta bancária. |
+| `GET` | `/api/accounts/{id}` | Recupera detalhes e saldo atual. |
+
+**Exemplo de Payload (POST):**
+```json
+{
+  "owner": "Jamerson Silva",
+  "cpf": "12345678901",
+  "initialDeposit": 500.00
+}
+
+```
 
 ---
 
