@@ -68,4 +68,23 @@ public class TransactionTests
             .Throw<ArgumentException>() // Espera que uma ArgumentException seja lançada
             .WithMessage("A descrição é obrigatória e deve ter no máximo 250 caracteres.");
     }
+
+    // valor nao pode ser 0
+    [Fact]
+    public void Constructor_WhenAmountIsZero_ShouldThrowException()
+    {
+        // Arrange
+        var accountId = Guid.NewGuid();
+        var amount = 0.00m; // Valor zero
+        var type = TransactionType.Credit;
+        var description = "Teste de valor zero";
+
+        // Act
+        Action act = () => new Transaction(accountId, amount, type, description);
+
+        // Assert
+        act.Should()
+            .Throw<ArgumentException>() // Espera que uma ArgumentException seja lançada
+            .WithMessage("O valor da transação não pode ser negativo. (Parameter 'amount')");
+    }
 }
