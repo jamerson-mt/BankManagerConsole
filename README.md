@@ -4,7 +4,7 @@
 ![.NET 10](https://img.shields.io/badge/.NET-10.0-512bd4?style=for-the-badge&logo=dotnet)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![Clean Architecture](https://img.shields.io/badge/Architecture-Clean-green?style=for-the-badge)
+![xUnit](https://img.shields.io/badge/Tests-xUnit%20%26%20FluentAssertions-green?style=for-the-badge)
 
 A **JJ Banking API** é um motor de serviços financeiros de alta performance desenvolvido para ser o "Core Banking" definitivo para desenvolvedores. Construída com o que há de mais moderno no ecossistema **.NET 10**, esta API oferece uma infraestrutura robusta, escalável e pronta para uso em projetos de Front-end, Mobile ou sistemas de gestão financeira.
 
@@ -14,10 +14,9 @@ A **JJ Banking API** é um motor de serviços financeiros de alta performance de
 - [Visão Geral](#-visão-geral)
 - [Diferenciais Estratégicos](#-diferenciais-estratégicos)
 - [Stack Tecnológica](#-stack-tecnológica)
-- [Arquitetura (Clean Architecture)](#-arquitetura-clean-architecture)
-- [Setup Instantâneo com Docker](#-setup-instantâneo-com-docker)
+- [Arquitetura e Qualidade](#-arquitetura-e-qualidade)
 - [Guia de Endpoints](#-guia-de-endpoints)
-- [Roadmap e Contribuição](#-roadmap-e-contribuição)
+- [Setup Instantâneo](#-setup-instantâneo-com-docker)
 
 ---
 
@@ -28,32 +27,52 @@ A proposta da **JJ Banking API** é eliminar a necessidade de mocks estáticos e
 ### 🎯 Para quem é este projeto?
 * **Devs Frontend/Mobile:** Consuma uma API real via Swagger e veja seus dados persistidos em um banco PostgreSQL.
 * **Devs Backend:** Explore as novas funcionalidades do **C# 14** e a robustez do **Entity Framework Core 10**.
-* **Open Source Contributors:** Use como base para criar novas funcionalidades e aprimorar seus conhecimentos em arquitetura de sistemas.
+* **Open Source:** Use como base para criar novas funcionalidades e aprimorar seus conhecimentos em arquitetura de sistemas.
 
 ---
 
 ## 💎 Diferenciais Estratégicos
 
-1. **Persistência Industrial:** Utiliza **PostgreSQL**, garantindo integridade transacional e suporte a grandes volumes de dados.
-2. **Encapsulamento de Domínio:** Regras de negócio protegidas dentro do Core (Domain), impedindo estados inválidos de saldo ou transações.
-3. **Developer Experience (DX):** Foco total no "Clonou, Rodou" via Docker Compose.
-4. **Arquitetura Escalável:** Estrutura preparada para suportar o crescimento da aplicação e futura migração para microserviços.
+1. **Persistência Industrial:** Utiliza **PostgreSQL**, garantindo integridade transacional e suporte a grandes volumes de dados via EF Core 10.
+2. **Invariantes de Domínio:** Regras de negócio protegidas (saldo insuficiente, transações negativas, validações de CPF) diretamente nas Entidades.
+3. **Segurança de Dados:** Uso rigoroso de **DTOs (Records)** para garantir que a API nunca exponha detalhes internos das entidades de banco.
+4. **Developer Experience (DX):** Foco total no "Clonou, Rodou" via Docker Compose e documentação automática.
 
 ---
 
-## 🏗️ Arquitetura (Clean Architecture)
+## 🏗️ Arquitetura e Qualidade
 
 O projeto segue os princípios da **Clean Architecture**, garantindo que a lógica de negócio seja independente de frameworks externos:
 
-* **`JJBanking.Domain`**: O coração do projeto. Contém as Entidades (como `Account`) e as Regras de Negócio.
-* **`JJBanking.Infra`**: A camada de persistência. Gerencia o Contexto do Entity Framework e as Migrations para o PostgreSQL.
-* **`JJBanking.API`**: A porta de entrada. Gerencia os Controllers, DTOs e a documentação via Swagger.
+### Camadas do Projeto:
+* **`JJBanking.Domain`**: O coração do projeto. Contém as Entidades (`Account`, `Transaction`), Enums e as Regras de Negócio.
+* **`JJBanking.Infra`**: Camada de persistência. Gerencia o Contexto do Entity Framework, Repositórios e as Migrations.
+* **`JJBanking.API`**: Porta de entrada. Gerencia Controllers, DTOs de Request/Response e Injeção de Dependência.
+
+### 🛡️ Qualidade de Software (Testes Automatizados):
+Para garantir a confiabilidade bancária, o projeto conta com:
+* **Testes Unitários (xUnit):** Validação de regras isoladas no domínio (ex: impedir saques negativos).
+* **Testes de Integração:** Validação do fluxo completo (API -> Service -> Banco) usando `WebApplicationFactory` e banco de dados real em memória.
+* **FluentAssertions:** Escrita de testes semânticos e de fácil manutenção.
+
+---
+
+## 🛠️ Guia de Endpoints (v1)
+
+### 👤 Contas (`/api/accounts`)
+* `POST /` - Criação de conta com depósito inicial obrigatório.
+* `GET /{id}` - Consulta de dados da conta e saldo em tempo real.
+
+### 💸 Transações (`/api/transaction`)
+* `POST /deposit` - Realiza um aporte financeiro em uma conta.
+* `POST /withdraw` - Realiza um saque (valida saldo insuficiente e valores positivos).
+* `GET /statement/{accountId}` - Retorna o histórico completo de transações da conta.
 
 ---
 
 ## 🚀 Setup Instantâneo com Docker
 
-Esqueça configurações manuais de banco de dados. Com o Docker, você sobe toda a stack com apenas um comando:
+Esqueça configurações manuais. Com o Docker, você sobe toda a stack com apenas um comando:
 
 1. **Clone o repositório:**
    ```bash
