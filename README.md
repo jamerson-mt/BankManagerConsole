@@ -13,9 +13,9 @@ A **JJ Banking API** é um motor de serviços financeiros de alta performance de
 ## 📖 Índice
 - [Visão Geral](#-visão-geral)
 - [Diferenciais Estratégicos](#-diferenciais-estratégicos)
-- [Stack Tecnológica](#-stack-tecnológica)
 - [Arquitetura e Qualidade](#-arquitetura-e-qualidade)
 - [Guia de Endpoints](#-guia-de-endpoints)
+- [Configuração de Ambiente](#-configuração-de-ambiente)
 - [Setup Instantâneo](#-setup-instantâneo-com-docker)
 
 ---
@@ -33,10 +33,10 @@ A proposta da **JJ Banking API** é eliminar a necessidade de mocks estáticos e
 
 ## 💎 Diferenciais Estratégicos
 
-1. **Persistência Industrial:** Utiliza **PostgreSQL**, garantindo integridade transacional e suporte a grandes volumes de dados via EF Core 10.
-2. **Invariantes de Domínio:** Regras de negócio protegidas (saldo insuficiente, transações negativas, validações de CPF) diretamente nas Entidades.
-3. **Segurança de Dados:** Uso rigoroso de **DTOs (Records)** para garantir que a API nunca exponha detalhes internos das entidades de banco.
-4. **Developer Experience (DX):** Foco total no "Clonou, Rodou" via Docker Compose e documentação automática.
+1. **Persistência Industrial:** Utiliza **PostgreSQL**, garantindo integridade transacional via EF Core 10.
+2. **Invariantes de Domínio:** Regras de negócio protegidas (saldo insuficiente, transações negativas) diretamente nas Entidades.
+3. **Segurança de Dados:** Uso rigoroso de **DTOs (Records)** e Variáveis de Ambiente para proteger a infraestrutura.
+4. **Developer Experience (DX):** Foco total no "Clonou, Rodou" via Docker Compose e documentação interativa.
 
 ---
 
@@ -44,49 +44,46 @@ A proposta da **JJ Banking API** é eliminar a necessidade de mocks estáticos e
 
 O projeto segue os princípios da **Clean Architecture**, garantindo que a lógica de negócio seja independente de frameworks externos:
 
-### Camadas do Projeto:
-* **`JJBanking.Domain`**: O coração do projeto. Contém as Entidades (`Account`, `Transaction`), Enums e as Regras de Negócio.
-* **`JJBanking.Infra`**: Camada de persistência. Gerencia o Contexto do Entity Framework, Repositórios e as Migrations.
-* **`JJBanking.API`**: Porta de entrada. Gerencia Controllers, DTOs de Request/Response e Injeção de Dependência.
+* **`JJBanking.Domain`**: O coração do projeto (Entidades, Enums e Regras de Negócio).
+* **`JJBanking.Infra`**: Camada de persistência (Contexto EF, Repositórios e Migrations).
+* **`JJBanking.API`**: Porta de entrada (Controllers, DTOs e Injeção de Dependência).
 
 ### 🛡️ Qualidade de Software (Testes Automatizados):
-Para garantir a confiabilidade bancária, o projeto conta com:
-* **Testes Unitários (xUnit):** Validação de regras isoladas no domínio (ex: impedir saques negativos).
-* **Testes de Integração:** Validação do fluxo completo (API -> Service -> Banco) usando `WebApplicationFactory` e banco de dados real em memória.
-* **FluentAssertions:** Escrita de testes semânticos e de fácil manutenção.
+* **Testes Unitários (xUnit):** Validação de regras isoladas no domínio.
+* **Testes de Integração:** Validação do fluxo completo (API -> Service -> Banco) usando `WebApplicationFactory`.
 
 ---
+
 ## 🛠️ Guia de Endpoints (v1)
 
-A API utiliza **Swagger/OpenAPI** para documentação. Ao rodar o projeto, acesse `http://localhost:5000/swagger` para testar os endpoints interativamente.
+A API utiliza **Swagger/OpenAPI** para documentação. Ao rodar o projeto, acesse o link abaixo para testar os endpoints interativamente:
 
-### Rota do Swagger: 
-
+👉 [http://localhost:5000/swagger](http://localhost:5000/swagger)
 
 ### 👤 Gerenciamento de Contas (`/api/accounts`)
+* `POST /api/accounts` - Criação de conta com depósito inicial.
+* `GET /api/accounts/{id}` - Consulta de dados e saldo atual.
 
-| Método | Endpoint | Descrição |
-| :--- | :--- | :--- |
-| `POST` | `/api/accounts` | Cria uma nova conta bancária. |
-| `GET` | `/api/accounts/{id}` | Recupera detalhes e saldo atual. |
+### 💸 Transações (`/api/transaction`)
+* `POST /api/transaction/deposit` - Realiza um aporte financeiro.
+* `POST /api/transaction/withdraw` - Realiza um saque (valida saldo insuficiente).
+* `GET /api/transaction/statement/{accountId}` - Extrato histórico completo.
 
-**Exemplo de Payload (POST):**
-```json
-{
-  "owner": "Jamerson Silva",
-  "cpf": "12345678901",
-  "initialDeposit": 500.00
-}
+---
 
-```
+## 🔐 Configuração de Ambiente
+
+Para garantir a segurança, as credenciais sensíveis não são versionadas. Antes de iniciar, configure o seu ambiente:
+
+1. Localize o arquivo `.env.example` na raiz do projeto.
+2. Crie uma cópia deste arquivo e renomeie para **`.env`**.
+3. O Docker Compose carregará automaticamente estas variáveis para configurar o banco e a API.
 
 ---
 
 ## 🚀 Setup Instantâneo com Docker
 
-Esqueça configurações manuais. Com o Docker, você sobe toda a stack com apenas um comando:
-
 1. **Clone o repositório:**
    ```bash
-   git clone [https://github.com/jamerson-mt/jj-banking-api.git](https://github.com/jamerson-mt/jj-banking-api.git)
-   cd jj-banking-api
+   git clone [https://github.com/jamerson-mt/jjbanking-api.git](https://github.com/jamerson-mt/jjbanking-api.git)
+   cd jjbanking-api
