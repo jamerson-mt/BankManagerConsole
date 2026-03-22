@@ -78,6 +78,7 @@ Para garantir a segurança, as credenciais sensíveis não são versionadas. Ant
 1. Localize o arquivo `.env.example` na raiz do projeto.
 2. Crie uma cópia deste arquivo e renomeie para **`.env`**.
 3. O Docker Compose carregará automaticamente estas variáveis para configurar o banco e a API.
+4. Ajuste as variáveis conforme necessário para acessar o banco PostgreSQL e configurar a API.
 
 ---
 
