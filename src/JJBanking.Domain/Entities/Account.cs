@@ -1,77 +1,72 @@
-﻿using System.ComponentModel.DataAnnotations; // Necessário para usar as anotações de validação, como [Required] e [StringLength]
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization; // Necessário para usar as anotações de mapeamento, como [Table] e [Column]
 
 namespace JJBanking.Domain.Entities;
 
-[Table("Accounts")] // Especifica o nome da tabela no banco de dados
+[Table("Accounts")]
 public class Account
 {
     [Key]
-    public Guid Id { get; private set; } = Guid.NewGuid(); // Gera um ID único para cada conta
+    public Guid Id { get; private set; } = Guid.NewGuid();
 
     [Required]
-    [StringLength(14, MinimumLength = 11)]
-    public string Cpf { get; private set; } = string.Empty;
+    public string AccountNumber { get; private set; } = default!; // Ex: "54321-0"
 
     [Required]
-    [MaxLength(100)]
-    public string Owner { get; private set; } = string.Empty;
+    public string Branch { get; private set; } = "0001"; // Agência fixa para começar
 
     [Required]
-    [Column(TypeName = "decimal(8,2)")]
+    [Column(TypeName = "decimal(8,2)")] // Aumentei a precisão para 18,2 (padrão bancário)
     public decimal Balance { get; private set; }
 
     [Required]
-    public DateTime CreatedAt { get; private set; } = DateTime.UtcNow; // Data de criação da conta
+    public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
 
-    public ICollection<Transaction> Transactions { get; private set; } = new List<Transaction>();
+    // --- RELACIONAMENTO COM USER ---
+    [Required]
+    public Guid UserId { get; private set; } // FK para o IdentityUser
 
-    // Construtor necessário para o Entity Framework
-    private Account() { } // O EF precisa de um construtor sem parâmetros para criar instâncias da entidade
+    [ForeignKey("UserId")] // Especifica que UserId é a chave estrangeira para a entidade User
+    public virtual User User { get; private set; } = null!;
 
-    // Construtor público para criar uma nova conta com um depósito inicial
-    public Account(string owner, string cpf, decimal initialDeposit)
+    // -------------------------------
+
+    public virtual ICollection<Transaction> Transactions { get; private set; } =
+        new List<Transaction>();
+
+    private Account() { }
+
+    // Construtor atualizado: agora recebe o UserId em vez de Nome/CPF
+    public Account(Guid userId, decimal initialDeposit, string accountNumber)
     {
-        // Validações básicas para garantir que os dados fornecidos são válidos
-        if (string.IsNullOrWhiteSpace(owner))
-            throw new ArgumentException("O nome do proprietário é obrigatório.", nameof(owner));
-        if (string.IsNullOrWhiteSpace(cpf))
-            throw new ArgumentException("O CPF é obrigatório.", nameof(cpf));
+        if (userId == Guid.Empty)
+            throw new ArgumentException("O ID do usuário é obrigatório.", nameof(userId));
+
         if (initialDeposit < 0)
             throw new ArgumentException(
                 "O depósito inicial não pode ser negativo.",
                 nameof(initialDeposit)
             );
-        // Atribui os valores fornecidos aos campos da conta
-        Owner = owner; // Define o proprietário da conta
-        Cpf = cpf; // Define o CPF do proprietário da conta
-        Balance = initialDeposit; // Define o saldo inicial da conta
+
+        UserId = userId;
+        Balance = initialDeposit;
+        AccountNumber = accountNumber;
     }
 
-    //METODO DE DEPOSITO
     public void Deposit(decimal amount)
     {
         if (amount <= 0)
             throw new ArgumentException("Depósito inválido");
-
         Balance += amount;
     }
 
-    // METODO DE SAQUE
     public void Withdraw(decimal amount)
     {
         if (amount <= 0)
-        {
-            throw new ArgumentException("O valor do saque deve ser positivo.");
-        }
-        else if (amount > Balance)
-        {
+            throw new ArgumentException("O valor deve ser positivo.");
+        if (amount > Balance)
             throw new InvalidOperationException("Saldo insuficiente.");
-        }
-        else
-        {
-            Balance -= amount;
-        }
+
+        Balance -= amount;
     }
 }
