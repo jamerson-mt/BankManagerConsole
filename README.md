@@ -24,7 +24,7 @@ A **JJ Banking API** é um motor de serviços financeiros de alta performance. C
 A proposta da **JJ Banking API** é oferecer um backend financeiro persistente e documentado. Diferente de mocks estáticos, aqui os dados são reais: ao registrar um usuário, o sistema gera automaticamente um **Número de Conta Único** e gerencia o saldo de forma segura.
 
 ### 🎯 Para quem é este projeto?
-* **Devs React Native / Mobile:** Consuma uma API real com documentação rica (XML Comments) e exemplos prontos no Swagger.
+* **Devs Frontend / Mobile:** Consuma uma API real com documentação rica (XML Comments) e exemplos prontos no Swagger.
 * **Devs Backend:** Explore Clean Architecture, Identity Framework e EF Core 10 com PostgreSQL.
 
 ---
@@ -68,5 +68,13 @@ A API utiliza **Swagger/OpenAPI** turbinado com comentários XML. Acesse para ve
 
 1. **Clone o repositório:**
    ```bash
-   git clone [https://github.com/jamerson-mt/jjbanking-api.git](https://github.com/jamerson-mt/jjbanking-api.git)
+   git clone https://github.com/jamerson-mt/jjbanking-api.git
    cd jjbanking-api
+   ```
+2. **Inicie os containers:**
+   ```bash
+   docker-compose up -d
+   ```
+3. **Acesse a API:**
+   - API: [http://localhost:5000](http://localhost:5000)
+   - Swagger: [http://localhost:5000/swagger](http://localhost:5000/swagger)
