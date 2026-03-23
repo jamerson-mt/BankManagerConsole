@@ -8,6 +8,7 @@ namespace JJBanking.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Tags("Contas")]
 public class AccountsController : ControllerBase
 {
     private readonly BankDbContext _context;
@@ -19,6 +20,11 @@ public class AccountsController : ControllerBase
 
     // 🆔 GET: api/accounts/{id}
     // BUSCA UMA CONTA ESPECIFICA
+    /// <summary>
+    /// Busca os detalhes de uma conta bancária pelo seu ID.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {

@@ -1,3 +1,4 @@
+using System.Reflection; // Adicione este using no topo
 using JJBanking.Domain.DTOs;
 using JJBanking.Domain.Entities;
 using JJBanking.Domain.Interfaces;
@@ -26,7 +27,30 @@ builder
 // --- SERVIÇOS ---
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc(
+        "v1",
+        new Microsoft.OpenApi.OpenApiInfo
+        {
+            Title = "JJ Banking API",
+            Version = "v1",
+            Description = "Documentação da API para integração com React Native.",
+        }
+    );
+
+    // 1. Pega o nome do arquivo XML gerado pelo compilador
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+
+    // 2. Localiza o caminho físico dele
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+
+    // 3. Verifica se o arquivo existe antes de tentar ler (evita erros no deploy)
+    if (File.Exists(xmlPath))
+    {
+        c.IncludeXmlComments(xmlPath);
+    }
+});
 
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IAuthService, AuthService>();

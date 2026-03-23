@@ -1,11 +1,13 @@
 using JJBanking.Domain.DTOs;
 using JJBanking.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace JJBanking.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Tags("Autenticação")]
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
@@ -15,7 +17,11 @@ public class AuthController : ControllerBase
         _authService = authService;
     }
 
-    // /api/auth/register
+    /// <summary>
+    /// Registra um novo usuário e cria uma conta bancária vinculada.
+    /// </summary>
+    /// <param name="request">Dados de cadastro (Email, Senha, Nome, CPF)</param>
+    /// <returns>Retorna o Token JWT e o Número da Conta gerado.</returns>
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] AccountRegister request)
     {
@@ -36,6 +42,11 @@ public class AuthController : ControllerBase
     }
 
     // POST: /api/auth/login
+    /// <summary>
+    /// Realiza o login do usuário e retorna um Token JWT para autenticação nas próximas requisições.
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {

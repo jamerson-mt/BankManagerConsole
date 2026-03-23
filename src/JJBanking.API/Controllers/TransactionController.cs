@@ -1,11 +1,13 @@
 using JJBanking.Domain.DTOs;
 using JJBanking.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace JJBanking.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Tags("Operações Bancárias")]
 public class TransactionController : ControllerBase
 {
     private readonly IAccountService _accountService;
@@ -16,6 +18,11 @@ public class TransactionController : ControllerBase
     }
 
     // REALIZA UMA TRANSAÇÃO DE DEPÓSITO
+    /// <summary>
+    /// Realiza um depósito em uma conta bancária. O valor é adicionado ao saldo da conta e registrado como uma transação do tipo "Crédito".
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
     [HttpPost("deposit")]
     public async Task<IActionResult> Deposit([FromBody] DepositRequest request)
     {
@@ -45,6 +52,11 @@ public class TransactionController : ControllerBase
     }
 
     // REALIZA UMA TRANSAÇÃO DE SAQUE
+    /// <summary>
+    /// Realiza um saque em uma conta bancária. O valor é subtraído do saldo da conta e registrado como uma transação do tipo "Débito". O serviço verifica se há saldo suficiente antes de processar o saque.
+    /// </summary>
+    /// <param name="request"></param>
+    /// <returns></returns>
     [HttpPost("withdraw")]
     public async Task<IActionResult> Withdraw([FromBody] DepositRequest request)
     {
@@ -73,6 +85,11 @@ public class TransactionController : ControllerBase
     }
 
     // OBTÉM O EXTRATO DE TRANSAÇÕES DE UMA CONTA
+    /// <summary>
+    /// Realiza a busca de transations de uma conta
+    /// </summary>
+    /// <param name="accountId"></param>
+    /// <returns></returns>
     [HttpGet("statement/{accountId}")]
     public async Task<IActionResult> GetStatement(Guid accountId)
     {
