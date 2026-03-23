@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\JJBanking.Domain\JJBanking.Domain.csproj" />
+    <ProjectReference Include="..\..\src\JJBanking.API\JJBanking.API.csproj" />
   </ItemGroup>
 
 </Project>

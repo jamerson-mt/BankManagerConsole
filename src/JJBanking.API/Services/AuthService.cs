@@ -4,6 +4,7 @@ using JJBanking.Domain.Interfaces;
 using JJBanking.Infra.Context;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using static JJBanking.API.Utils.CpfValidator;
 
 public class AuthService : IAuthService
 {
@@ -31,8 +32,20 @@ public class AuthService : IAuthService
                 Cpf = request.Cpf,
             };
 
+            //valida CPF (formato e quantidade de dígitos)
+            if (!IsValidCpf(user.Cpf))
+            {
+                throw new Exception("CPF inválido. Informe um CPF realmente válido.");
+            }
+
+            bool cpfExists = await _userManager.Users.AnyAsync(u => u.Cpf == user.Cpf); // Verifica se o CPF já existe no banco de dados
+            if (cpfExists)
+            {
+                throw new Exception("CPF já cadastrado. Informe um CPF diferente.");
+            }
+
             // 1. Cria o usuário
-            var result = await _userManager.CreateAsync(user, request.Password);
+            var result = await _userManager.CreateAsync(user, request.Password); // Cria o usuário com a senha fornecida
             if (!result.Succeeded)
             {
                 var error = result.Errors.FirstOrDefault()?.Description ?? "Erro ao criar usuário.";
@@ -40,17 +53,26 @@ public class AuthService : IAuthService
             }
 
             // 2. Gera número de conta ÚNICO (com check no banco)
-            var accNumber = await GenerateUniqueNumber();
+            var _random = new Random();
+            string accountNumber;
+            bool exists;
+
+            do
+            {
+                accountNumber = $"{_random.Next(1000, 9999)}-{_random.Next(0, 9)}";
+                // Verifica se já existe uma conta com esse número no banco
+                exists = await _context.Accounts.AnyAsync(a => a.AccountNumber == accountNumber);
+            } while (exists);
 
             // 3. Cria a conta
-            var account = new Account(user.Id, 0m, accNumber);
+            var account = new Account(user.Id, 0m, accountNumber);
             _context.Accounts.Add(account);
             await _context.SaveChangesAsync();
 
-            await transaction.CommitAsync();
+            await transaction.CommitAsync(); // Se tudo deu certo, confirma a transação no banco
 
-            // Aqui você depois vai implementar a geração real do Token JWT
-            return new AuthResponse("token_provisorio", accNumber, user.FullName);
+            // Implementar geração de token JWT aqui, por enquanto retorna um token provisório
+            return new AuthResponse("token_provisorio", accountNumber, user.FullName);
         }
         catch
         {
@@ -75,21 +97,5 @@ public class AuthService : IAuthService
 
         // Aqui geraremos o JWT em breve
         return new AuthResponse("token_real_vindo_daqui_a_pouco", accountNumber, user.FullName);
-    }
-
-    private async Task<string> GenerateUniqueNumber()
-    {
-        var random = new Random();
-        string number;
-        bool exists;
-
-        do
-        {
-            number = $"{random.Next(1000, 9999)}-{random.Next(0, 9)}";
-            // Verifica se já existe uma conta com esse número no banco
-            exists = await _context.Accounts.AnyAsync(a => a.AccountNumber == number);
-        } while (exists);
-
-        return number;
     }
 }
