@@ -1,38 +1,60 @@
 using JJBanking.Domain.Entities;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace JJBanking.Infra.Context;
 
-public class BankDbContext : DbContext
+// Alteramos a herança para suportar o Identity com User e Roles usando Guid
+public class BankDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
 {
     public BankDbContext(DbContextOptions<BankDbContext> options)
         : base(options) { }
 
-    public DbSet<Account> Accounts => Set<Account>(); // Propriedade para acessar a tabela de contas
-    public DbSet<Transaction> Transactions => Set<Transaction>(); // Propriedade para acessar a tabela de transações
+    public DbSet<Account> Accounts => Set<Account>();
+    public DbSet<Transaction> Transactions => Set<Transaction>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // IMPORTANTE: Chama o mapeamento padrão do Identity
+        // Sem isso, as tabelas de login (AspNetUsers, etc) não serão criadas
+        base.OnModelCreating(modelBuilder);
+
+        // (USER) - Configurações para a entidade User
+        modelBuilder.Entity<User>(entity =>
+        {
+            entity.HasIndex(u => u.Cpf).IsUnique(); // CPF único agora é no USER
+            entity.Property(u => u.FullName).IsRequired().HasMaxLength(100);
+        });
+
         // (ACCOUNT) - Configurações para a entidade Account
-        modelBuilder.Entity<Account>().HasKey(a => a.Id);
+        modelBuilder.Entity<Account>(entity =>
+        {
+            entity.HasKey(a => a.Id);
+            entity.HasIndex(a => a.AccountNumber).IsUnique(); // Número de conta deve ser único
 
-        //Cpf deve ser único para cada conta, garantindo que não haja duplicatas
-        modelBuilder.Entity<Account>().HasIndex(a => a.Cpf).IsUnique();
+            // Note: Removemos o índice de CPF da Account, pois o CPF não existe mais nela
+            entity.Property(a => a.Balance).HasColumnType("decimal(18,2)"); // Aumentei para 18,2 (padrão financeiro)
 
-        //garante que o campo Balance seja do tipo decimal com precisão de 8 dígitos e 2 casas decimais
-        modelBuilder.Entity<Account>().Property(a => a.Balance).HasColumnType("decimal(8,2)");
+            // Relacionamento 1:1 (Um USUÁRIO tem uma CONTA)
+            entity
+                .HasOne(a => a.User)
+                .WithOne(u => u.Account)
+                .HasForeignKey<Account>(a => a.UserId)
+                .OnDelete(DeleteBehavior.Cascade); // Se um usuário for deletado, a conta associada também será deletada
+        });
 
         // (TRANSACTION) - Configurações para a entidade Transaction
-        modelBuilder.Entity<Transaction>().HasKey(t => t.Id);
-        modelBuilder.Entity<Transaction>().Property(t => t.Amount).HasColumnType("decimal(8,2)");
+        modelBuilder.Entity<Transaction>(entity =>
+        {
+            entity.HasKey(t => t.Id);
+            entity.Property(t => t.Amount).HasColumnType("decimal(18,2)");
 
-        // Relacionamento 1:N (Uma CONTA tem muitas TRANSAÇÕES)
-        modelBuilder
-            .Entity<Transaction>() // Configura a entidade Transaction
-            .HasOne(t => t.Account) // Cada transação tem uma conta associada
-            .WithMany(a => a.Transactions) // Uma conta pode ter muitas transações
-            .HasForeignKey(t => t.AccountId); // Chave estrangeira na tabela de transações que aponta para a conta
-
-        base.OnModelCreating(modelBuilder);
+            // Relacionamento 1:N (Uma CONTA tem muitas TRANSAÇÕES)
+            entity
+                .HasOne(t => t.Account)
+                .WithMany(a => a.Transactions)
+                .HasForeignKey(t => t.AccountId);
+        });
     }
 }
