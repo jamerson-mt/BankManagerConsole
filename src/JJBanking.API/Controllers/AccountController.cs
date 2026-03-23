@@ -20,7 +20,7 @@ public class AccountsController : ControllerBase
     // 🚀 POST: api/accounts
     // CRIA UMA NOVA CONTA
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreatedAccountResponse request)
+    public async Task<IActionResult> Create([FromBody] CreatedAccountRequest request)
     {
         // Validação básica
         if (request.InitialDeposit < 0)

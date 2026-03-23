@@ -88,5 +88,3 @@ public class TransactionController : ControllerBase
         return Ok(response);
     }
 }
-
-// DTO (Data Transfer Object) - Apenas para receber os dados do JSON
