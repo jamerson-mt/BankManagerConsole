@@ -28,20 +28,57 @@ public class AccountsController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
-        var account = await _context.Accounts.FindAsync(id);
+        try
+        {
+            var account = await _context
+                .Accounts.Include(a => a.User)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(a => a.Id == id);
 
-        if (account == null)
-            return NotFound("Conta não encontrada.");
+            if (account == null)
+                return NotFound("Conta não encontrada.");
 
-        var response = new AccountResponse(
-            account.Id,
-            account.User.FullName,
-            account.User.Cpf,
-            account.Balance
-        );
+            var response = new AccountResponse(
+                account.Id,
+                account.User.FullName,
+                account.User.Cpf,
+                account.Balance,
+                account.AccountNumber,
+                account.User.Cpf
+            );
 
-        return Ok(response);
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
+
+    // 🆔 GET: api/accounts/
+    // BUSCA todas as contas
+    /// <summary>
+    /// Busca as contas existentes.
+    /// </summary>
+    /// <returns>accounts</returns>
+    [HttpGet()]
+    public async Task<IActionResult> GetAll()
+    {
+        // O .Include(a => a.User) faz o "JOIN" com a tabela de usuários
+        var accounts = await _context
+            .Accounts.AsNoTracking()
+            .Select(a => new AccountResponse(
+                a.Id,
+                a.User.FullName,
+                a.User.Cpf,
+                a.Balance,
+                a.AccountNumber,
+                a.Branch
+            ))
+            .ToListAsync();
+        if (accounts.Count == 0)
+            return NotFound("Sem registro no momento.");
+
+        return Ok(accounts);
     }
 }
-
-// DTO (Data Transfer Object) para não expor a entidade pura no request

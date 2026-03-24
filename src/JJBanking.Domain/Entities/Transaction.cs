@@ -33,7 +33,7 @@ public class Transaction
 
     public Transaction(Guid accountId, decimal amount, TransactionType type, string description)
     {
-        // Validação de valor negativo (Resolve 2 falhas)
+        // Validação de valor negativo e zerado (Resolve 2 falhas) Deposit and WithDraw
         if (amount <= 0)
             throw new ArgumentException(
                 "O valor da transação não pode ser negativo. (Parameter 'amount')"
