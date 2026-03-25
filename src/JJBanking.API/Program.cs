@@ -10,23 +10,9 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // --- BANCO DE DADOS (Configuração Condicional) ---
-if (builder.Environment.IsEnvironment("Testing"))
-{
-    builder.Services.AddDbContext<BankDbContext>(options =>
-    {
-        options.UseInMemoryDatabase("TestDb");
-        options.ConfigureWarnings(x =>
-            x.Ignore(
-                Microsoft.EntityFrameworkCore.Diagnostics.InMemoryEventId.TransactionIgnoredWarning
-            )
-        );
-    });
-}
-else
-{
-    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-    builder.Services.AddDbContext<BankDbContext>(options => options.UseNpgsql(connectionString));
-}
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContext<BankDbContext>(options => options.UseNpgsql(connectionString));
 
 // --- IDENTITY (Configuração Essencial) ---
 builder
@@ -86,6 +72,23 @@ builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 var app = builder.Build();
+
+// Program.cs
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<BankDbContext>();
+        // Isso aplica as migrations pendentes automaticamente
+        context.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Ocorreu um erro ao aplicar as migrations.");
+    }
+}
 
 // --- PIPELINE ---
 app.UseSwagger();
