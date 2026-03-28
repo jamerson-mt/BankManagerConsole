@@ -6,18 +6,53 @@ using JJBanking.Domain.Entities;
 
 namespace JJBanking.IntegrationTests;
 
-public class AuthControllerTests : IClassFixture<CustomWebApplicationFactory>
+public class AuthControllerTests
 {
     private readonly HttpClient _client;
 
-    public AuthControllerTests(CustomWebApplicationFactory factory)
+    public AuthControllerTests()
     {
-        _client = factory.CreateClient(); //
+        // Se você for rodar os testes batendo na API local:
+        _client = new HttpClient
+        {
+            BaseAddress = new Uri("http://localhost:5080"), // Porta que definimos no Docker/Local
+        };
     }
 
     // Gerador de CPF
-    private string GenerateRandomCpf() =>
-        Random.Shared.Next(100000000, 999999999).ToString() + "00";
+    public static string GenerateRandomCpf()
+    {
+        Random random = new();
+
+        // 1. Gera os 9 primeiros dígitos aleatoriamente
+        int[] sementes = new int[9];
+        for (int i = 0; i < 9; i++)
+            sementes[i] = random.Next(0, 10);
+
+        // 2. Calcula o primeiro dígito verificador
+        int soma = 0;
+        int[] multiplicador1 = [10, 9, 8, 7, 6, 5, 4, 3, 2];
+        for (int i = 0; i < 9; i++)
+            soma += sementes[i] * multiplicador1[i];
+
+        int resto = soma % 11;
+        int d1 = resto < 2 ? 0 : 11 - resto;
+
+        // 3. Calcula o segundo dígito verificador
+        soma = 0;
+        int[] multiplicador2 = [11, 10, 9, 8, 7, 6, 5, 4, 3, 2];
+
+        // Soma os 9 primeiros + o primeiro dígito calculado
+        for (int i = 0; i < 9; i++)
+            soma += sementes[i] * multiplicador2[i];
+        soma += d1 * multiplicador2[9];
+
+        resto = soma % 11;
+        int d2 = resto < 2 ? 0 : 11 - resto;
+
+        // 4. Concatena tudo em uma string de 11 dígitos
+        return string.Join("", sementes) + d1.ToString() + d2.ToString();
+    }
 
     // TESTE DE REGISTRO DE CONTA NO BANCO (sucesso e cpf nao cadastrado)
     [Fact]
@@ -26,10 +61,10 @@ public class AuthControllerTests : IClassFixture<CustomWebApplicationFactory>
         // Arrange
         var request = new
         {
-            email = "teste123@gmail.com",
+            email = "teste124@gmail.com",
             password = "Teste@1234",
             fullName = "Teste de Registro",
-            cpf = "09478206478", // O CPF DEVE SER UNICO PARA CADA TESTE, POIS A API NAO PERMITE DUPLICADOS
+            cpf = GenerateRandomCpf(), // O CPF DEVE SER UNICO PARA CADA TESTE, POIS A API NAO PERMITE DUPLICADOS
         };
 
         // Act
@@ -53,7 +88,7 @@ public class AuthControllerTests : IClassFixture<CustomWebApplicationFactory>
         content.Should().NotBeNull();
         content!.Token.Should().NotBeNullOrEmpty();
         content.AccountNumber.Should().NotBeNullOrEmpty();
-        content.UserName.Should().Be(request.fullName);
+        content.FullName.Should().Be(request.fullName);
     }
 
     // TESTE DE REGISTRO COM SENHA FRACA

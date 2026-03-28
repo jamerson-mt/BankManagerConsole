@@ -1,28 +1,21 @@
 services:
-  jj-db:
-    image: postgres:17-alpine
-    container_name: jj-banking-db
-    restart: always
-    environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - "5432:5432"
-    volumes:
-      - jj-data:/var/lib/postgresql/data
-
   jj-api:
     build: .
-    container_name: jj-banking-api
+    container_name: jjbanking-api
+    restart: always
     ports:
       - "5000:8080"
     environment:
+      - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8080
-      # O .NET mapeia automaticamente o "__" para ":" do appsettings
-      - ConnectionStrings__DefaultConnection=Host=jj-db;Database=${DB_NAME};Username=${DB_USER};Password=${DB_PASSWORD}
-    depends_on:
-      - jj-db
+      # O caminho do banco deve apontar para a pasta que vamos persistir no volume
+      - ConnectionStrings__DefaultConnection=Data Source=/app/data/jjbanking.db
+    volumes:
+      - jj-banking-data:/app/data
+    deploy:
+      resources:
+        limits:
+          memory: 128M # Limite de segurança para sua VPS de 512MB
 
 volumes:
-  jj-data:
+  jj-banking-data:

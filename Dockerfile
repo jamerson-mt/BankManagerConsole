@@ -1,7 +1,7 @@
 # Estágio de Build (SDK do .NET 10)
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /app
-
+RUN mkdir -p /app/data  
 # Copia os arquivos .csproj e restaura as dependências
 COPY ["src/JJBanking.API/JJBanking.API.csproj", "src/JJBanking.API/"]
 COPY ["src/JJBanking.Domain/JJBanking.Domain.csproj", "src/JJBanking.Domain/"]

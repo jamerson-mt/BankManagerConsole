@@ -8,17 +8,21 @@ using Xunit;
 namespace JJBanking.IntegrationTests.Controllers;
 
 // Program é a classe principal da sua API
-public class AccountControllerTests : IClassFixture<WebApplicationFactory<Program>>
+public class AccountControllerTests
 {
     private string GenerateRandomCpf() =>
         Random.Shared.Next(100000000, 999999999).ToString() + "00";
 
     private readonly HttpClient _client;
 
-    public AccountControllerTests(WebApplicationFactory<Program> factory)
+    public AccountControllerTests()
     {
         // Cria um "cliente" que sabe conversar com a sua API em memória
-        _client = factory.CreateClient();
+        // Se você for rodar os testes batendo na API local:
+        _client = new HttpClient
+        {
+            BaseAddress = new Uri("http://localhost:5080"), // Porta que definimos no Docker/Local
+        };
     }
 
     // TESTE PARA BUSCA DE UMA CONTA VALIDA
@@ -26,7 +30,7 @@ public class AccountControllerTests : IClassFixture<WebApplicationFactory<Progra
     public async Task AccountSearch_WhenOneAccountValid_ShouldReturnSuccess()
     {
         // Arrange: Use o ID que você sabe que existe no seu banco de teste (InMemory ou SQLite)
-        var accountId = "ab46a0e3-26c5-4787-8157-7c5266068800";
+        var accountId = "bafb21f8-acd0-44e2-8348-3101c5f1e276";
 
         // Act: Note que passamos apenas a string do ID na URL, não o objeto 'request' inteiro
         var response = await _client.GetAsync($"/api/accounts/{accountId}");

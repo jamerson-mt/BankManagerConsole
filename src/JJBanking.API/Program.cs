@@ -1,4 +1,4 @@
-using System.Reflection; // Adicione este using no topo
+using System.Reflection;
 using JJBanking.Domain.DTOs;
 using JJBanking.Domain.Entities;
 using JJBanking.Domain.Interfaces;
@@ -9,12 +9,13 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --- BANCO DE DADOS (Configuração Condicional) ---
-
+// --- BANCO DE DADOS (Ajustado para SQLite) ---
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<BankDbContext>(options => options.UseNpgsql(connectionString));
 
-// --- IDENTITY (Configuração Essencial) ---
+// IMPORTANTE: Trocar .UseNpgsql por .UseSqlite
+builder.Services.AddDbContext<BankDbContext>(options => options.UseSqlite(connectionString));
+
+// --- IDENTITY (Permanece igual) ---
 builder
     .Services.AddIdentity<User, IdentityRole<Guid>>(options =>
     {
@@ -32,10 +33,7 @@ builder.Services.AddCors(options =>
         "AllowLocalhost",
         policy =>
         {
-            policy
-                .AllowAnyOrigin() // Em localhost, permitir qualquer origem facilita o dev
-                .AllowAnyHeader() // Permite qualquer header, útil para tokens e custom headers do React Native
-                .AllowAnyMethod(); // Permite qualquer método HTTP (GET, POST, PUT, DELETE, etc.)
+            policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
         }
     );
 });
@@ -44,28 +42,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc(
-        "v1",
-        new Microsoft.OpenApi.OpenApiInfo
-        {
-            Title = "JJ Banking API",
-            Version = "v1",
-            Description = "Documentação da API para integração com React Native.",
-        }
-    );
-
-    // 1. Pega o nome do arquivo XML gerado pelo compilador
-    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-
-    // 2. Localiza o caminho físico dele
-    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-
-    // 3. Verifica se o arquivo existe antes de tentar ler (evita erros no deploy)
-    if (File.Exists(xmlPath))
-    {
-        c.IncludeXmlComments(xmlPath);
-    }
+{ /* ... sua config de swagger ... */
 });
 
 builder.Services.AddScoped<IAccountService, AccountService>();
@@ -73,14 +50,25 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 
 var app = builder.Build();
 
-// Program.cs
+// --- MIGRATIONS E CRIAÇÃO DE DIRETÓRIO ---
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
     {
+        // Trecho extra para garantir que a pasta /app/data exista antes de criar o banco
+        var connString = builder.Configuration.GetConnectionString("DefaultConnection");
+        if (!string.IsNullOrEmpty(connString) && connString.Contains("Data Source="))
+        {
+            var dbPath = connString.Replace("Data Source=", "");
+            var directory = Path.GetDirectoryName(dbPath);
+            if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
+            {
+                Directory.CreateDirectory(directory);
+            }
+        }
+
         var context = services.GetRequiredService<BankDbContext>();
-        // Isso aplica as migrations pendentes automaticamente
         context.Database.Migrate();
     }
     catch (Exception ex)
@@ -94,7 +82,7 @@ using (var scope = app.Services.CreateScope())
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection(); // Dica: Em VPS com Reverse Proxy (Nginx), às vezes é melhor desativar isso se o Nginx já cuida do SSL.
 app.UseCors("AllowLocalhost");
 app.UseAuthentication();
 app.UseAuthorization();

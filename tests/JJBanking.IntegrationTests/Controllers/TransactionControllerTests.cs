@@ -7,13 +7,16 @@ using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace JJBanking.IntegrationTests.Controllers;
 
-public class TransactionControllerTests : IClassFixture<WebApplicationFactory<Program>>
+public class TransactionControllerTests
 {
     private readonly HttpClient _client;
 
-    public TransactionControllerTests(WebApplicationFactory<Program> factory)
+    public TransactionControllerTests()
     {
-        _client = factory.CreateClient();
+        _client = new HttpClient
+        {
+            BaseAddress = new Uri("http://localhost:5080"), // Porta que definimos no Docker/Local
+        };
     }
 
     // // TESTE PARA VER SE O ENDPOINT DE DEPÓSITO FUNCIONA CORRETAMENTE
