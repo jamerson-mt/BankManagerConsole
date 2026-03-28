@@ -24,17 +24,6 @@ builder
     .AddEntityFrameworkStores<BankDbContext>()
     .AddDefaultTokenProviders();
 
-// --- CONFIGURAÇÃO DE CORS (AJUSTADA) ---
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy(
-        "ProductionPolicy",
-        policy =>
-        {
-            policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
-        }
-    );
-});
 
 // --- SERVIÇOS ---
 builder.Services.AddControllers();
@@ -81,8 +70,6 @@ app.UseSwaggerUI();
 // 1. Roteamento deve vir primeiro
 app.UseRouting();
 
-// 2. CORS deve vir após o Routing e ANTES da Autenticação
-app.UseCors("ProductionPolicy");
 
 // 3. Segurança
 app.UseAuthentication();
